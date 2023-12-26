@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import team.weyoung.common.Result;
+import team.weyoung.model.dto.competition.CompetitionQueryRequest;
 import team.weyoung.model.entity.ContestantInfo;
 import team.weyoung.service.IContestantInfoService;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,4 +32,11 @@ public class ContestantInfoController {
     @Resource
     private IContestantInfoService iContestantInfoService;
 
+    @PostMapping("/list/page")
+    public Result<Page<ContestantInfo>> listContestantInfoPage(@RequestBody CompetitionQueryRequest competitionQueryRequest) {
+        long pageNumber = competitionQueryRequest.getPageNumber();
+        long pageSize = competitionQueryRequest.getPageSize();
+        Page<ContestantInfo> contestantInfoPage = iContestantInfoService.page(new Page<>(pageNumber, pageSize));
+        return Result.success(contestantInfoPage);
+    }
 }

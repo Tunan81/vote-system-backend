@@ -1,23 +1,24 @@
 package team.weyoung.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.mybatisflex.core.paginate.Page;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 import team.weyoung.common.DeleteRequest;
 import team.weyoung.common.ErrorCode;
 import team.weyoung.common.Result;
 import team.weyoung.exception.BusinessException;
 import team.weyoung.exception.ThrowUtils;
 import team.weyoung.model.dto.competition.CompetitionQueryRequest;
+import team.weyoung.model.dto.competition.ContestantUploadDTO;
 import team.weyoung.model.entity.Competition;
 import team.weyoung.service.ICompetitionService;
+import team.weyoung.service.IContestantInfoService;
+import team.weyoung.listener.UploadDTOListener;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.io.IOException;
 
 /**
  * 比赛表 控制层。
@@ -31,6 +32,9 @@ public class CompetitionController {
 
     @Resource
     private ICompetitionService iCompetitionService;
+
+    @Resource
+    private IContestantInfoService iContestantInfoService;
 
     @PostMapping("/add")
     public Result<Long> addCompetition(@RequestBody Competition competition) {
@@ -57,5 +61,15 @@ public class CompetitionController {
         long pageSize = competitionQueryRequest.getPageSize();
         Page<Competition> competitionPage = iCompetitionService.page(new Page<>(pageNumber, pageSize));
         return Result.success(competitionPage);
+    }
+
+    @PostMapping("/upload")
+    public Result<Boolean> upload(MultipartFile file,Long competitionId) throws IOException {
+        if (file.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        EasyExcel.read(file.getInputStream(), ContestantUploadDTO.class, new UploadDTOListener(iContestantInfoService,competitionId)).sheet().doRead();
+        // 把文件存入到临时文件
+        return Result.success(true);
     }
 }

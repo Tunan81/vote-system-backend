@@ -37,6 +37,11 @@ public class ContestantInfo implements Serializable {
     private String contestantName;
 
     /**
+     * 选择的歌曲
+     */
+    private String songName;
+
+    /**
      * 所属比赛ID，外键关联到比赛信息表
      */
     private Long competitionId;
@@ -45,11 +50,6 @@ public class ContestantInfo implements Serializable {
      * 选手获得的投票数
      */
     private Integer score;
-
-    /**
-     * 选手总票数（评委分数加观众票数百分比得出的总票数）
-     */
-    private Integer totalScore;
 
     /**
      * 创建时间
