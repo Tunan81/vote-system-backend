@@ -111,11 +111,11 @@
             <version>1.7.2</version>
         </dependency>
         <!-- 3.mybatis-flex代码生成器，如果开启后target目录中的文件不会生成-->
-        <dependency>
-            <groupId>com.mybatis-flex</groupId>
-            <artifactId>mybatis-flex-codegen</artifactId>
-            <version>1.7.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.mybatis-flex</groupId>-->
+<!--            <artifactId>mybatis-flex-codegen</artifactId>-->
+<!--            <version>1.7.2</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

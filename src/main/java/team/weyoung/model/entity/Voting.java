@@ -1,9 +1,12 @@
 package team.weyoung.model.entity;
 
 import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
+
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +28,7 @@ public class Voting implements Serializable {
     /**
      * 投票ID，唯一标识投票
      */
-    @Id
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long voteId;
 
     /**

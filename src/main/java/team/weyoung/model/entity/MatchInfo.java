@@ -2,9 +2,12 @@ package team.weyoung.model.entity;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
+
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +29,7 @@ public class MatchInfo implements Serializable {
     /**
      * 对战ID，唯一标识比赛对战
      */
-    @Id
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long matchId;
 
     /**
@@ -48,18 +51,6 @@ public class MatchInfo implements Serializable {
      * 获胜选手ID，关联到选手信息表
      */
     private Long winningContestantId;
-
-    /**
-     * 歌手1选的歌曲
-     */
-    @Column(value = "song_selected_1")
-    private String songSelected1;
-
-    /**
-     * 歌手2选的歌曲
-     */
-    @Column(value = "song_selected_2")
-    private String songSelected2;
 
     /**
      * 创建时间

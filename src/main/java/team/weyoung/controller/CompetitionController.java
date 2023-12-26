@@ -1,20 +1,22 @@
 package team.weyoung.controller;
 
 import com.mybatisflex.core.paginate.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import team.weyoung.common.DeleteRequest;
+import team.weyoung.common.ErrorCode;
+import team.weyoung.common.Result;
+import team.weyoung.exception.BusinessException;
+import team.weyoung.exception.ThrowUtils;
+import team.weyoung.model.dto.competition.CompetitionQueryRequest;
 import team.weyoung.model.entity.Competition;
 import team.weyoung.service.ICompetitionService;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -30,69 +32,30 @@ public class CompetitionController {
     @Resource
     private ICompetitionService iCompetitionService;
 
-//    /**
-//     * 添加比赛表。
-//     *
-//     * @param competition 比赛表
-//     * @return {@code true} 添加成功，{@code false} 添加失败
-//     */
-//    @PostMapping("save")
-//    public boolean save(@RequestBody Competition competition) {
-//        return iCompetitionService.save(competition);
-//    }
-//
-//    /**
-//     * 根据主键删除比赛表。
-//     *
-//     * @param id 主键
-//     * @return {@code true} 删除成功，{@code false} 删除失败
-//     */
-//    @DeleteMapping("remove/{id}")
-//    public boolean remove(@PathVariable Serializable id) {
-//        return iCompetitionService.removeById(id);
-//    }
-//
-//    /**
-//     * 根据主键更新比赛表。
-//     *
-//     * @param competition 比赛表
-//     * @return {@code true} 更新成功，{@code false} 更新失败
-//     */
-//    @PutMapping("update")
-//    public boolean update(@RequestBody Competition competition) {
-//        return iCompetitionService.updateById(competition);
-//    }
-//
-//    /**
-//     * 查询所有比赛表。
-//     *
-//     * @return 所有数据
-//     */
-//    @GetMapping("list")
-//    public List<Competition> list() {
-//        return iCompetitionService.list();
-//    }
-//
-//    /**
-//     * 根据比赛表主键获取详细信息。
-//     *
-//     * @param id 比赛表主键
-//     * @return 比赛表详情
-//     */
-//    @GetMapping("getInfo/{id}")
-//    public Competition getInfo(@PathVariable Serializable id) {
-//        return iCompetitionService.getById(id);
-//    }
-//
-//    /**
-//     * 分页查询比赛表。
-//     *
-//     * @param page 分页对象
-//     * @return 分页对象
-//     */
-//    @GetMapping("page")
-//    public Page<Competition> page(Page<Competition> page) {
-//        return iCompetitionService.page(page);
-//    }
+    @PostMapping("/add")
+    public Result<Long> addCompetition(@RequestBody Competition competition) {
+        if (competition == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = iCompetitionService.save(competition);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return Result.success(competition.getCompetitionId());
+    }
 
+    @PostMapping("/delete")
+    public Result<Boolean> deleteCompetition(@RequestBody DeleteRequest deleteRequest) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean b = iCompetitionService.removeById(deleteRequest.getId());
+        return Result.success(b);
+    }
+
+    @PostMapping("/list/page")
+    public Result<Page<Competition>> page(@RequestBody CompetitionQueryRequest competitionQueryRequest, HttpServletRequest request) {
+        long pageNumber = competitionQueryRequest.getPageNumber();
+        long pageSize = competitionQueryRequest.getPageSize();
+        Page<Competition> competitionPage = iCompetitionService.page(new Page<>(pageNumber, pageSize));
+        return Result.success(competitionPage);
+    }
 }
