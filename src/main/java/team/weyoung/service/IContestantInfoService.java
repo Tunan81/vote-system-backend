@@ -1,6 +1,8 @@
 package team.weyoung.service;
 
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
+import team.weyoung.model.dto.contestantInfo.ContestantInfoQueryRequest;
 import team.weyoung.model.entity.ContestantInfo;
 
 /**
@@ -11,4 +13,5 @@ import team.weyoung.model.entity.ContestantInfo;
  */
 public interface IContestantInfoService extends IService<ContestantInfo> {
 
+    Page<ContestantInfo> listContestantInfoPage(ContestantInfoQueryRequest contestantInfoQueryRequest);
 }

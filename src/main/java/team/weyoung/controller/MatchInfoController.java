@@ -1,21 +1,16 @@
 package team.weyoung.controller;
 
 import com.mybatisflex.core.paginate.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import team.weyoung.model.entity.MatchInfo;
+import team.weyoung.common.Result;
+import team.weyoung.model.dto.matchInfo.MatchInfoQueryRequest;
+import team.weyoung.model.vo.MatchInfoVO;
 import team.weyoung.service.IMatchInfoService;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 对战信息表 控制层。
@@ -26,5 +21,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/matchInfo")
 public class MatchInfoController {
+
+    @Resource
+    private IMatchInfoService iMatchInfoService;
+
+    @PostMapping("/list/page")
+    public Result<Page<MatchInfoVO>> listMatchInfoPage(@RequestBody MatchInfoQueryRequest matchInfoQueryRequest) {
+        Page<MatchInfoVO> page = iMatchInfoService.listMatchInfo(matchInfoQueryRequest);
+        return Result.success(page);
+    }
 
 }

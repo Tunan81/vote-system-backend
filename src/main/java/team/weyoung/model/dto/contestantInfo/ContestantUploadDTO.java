@@ -1,4 +1,4 @@
-package team.weyoung.model.dto.competition;
+package team.weyoung.model.dto.contestantInfo;
 
 
 import com.alibaba.excel.annotation.ExcelProperty;

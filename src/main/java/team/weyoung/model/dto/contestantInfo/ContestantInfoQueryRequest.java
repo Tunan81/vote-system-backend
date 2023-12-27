@@ -8,11 +8,14 @@ import java.io.Serializable;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class contestantInfoQueryRequest extends PageRequest implements Serializable {
+public class ContestantInfoQueryRequest extends PageRequest implements Serializable {
+
     /**
      * id
      */
     private Long contestantId;
+
+    private Long competitionId;
 
     /**
      * 选手名称

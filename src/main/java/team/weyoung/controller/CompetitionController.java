@@ -2,6 +2,9 @@ package team.weyoung.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import team.weyoung.common.DeleteRequest;
@@ -10,15 +13,23 @@ import team.weyoung.common.Result;
 import team.weyoung.exception.BusinessException;
 import team.weyoung.exception.ThrowUtils;
 import team.weyoung.model.dto.competition.CompetitionQueryRequest;
-import team.weyoung.model.dto.competition.ContestantUploadDTO;
+import team.weyoung.model.dto.competition.CompetitionUpdateDTO;
+import team.weyoung.model.dto.contestantInfo.ContestantUploadDTO;
 import team.weyoung.model.entity.Competition;
+import team.weyoung.model.entity.ContestantInfo;
+import team.weyoung.model.entity.MatchInfo;
 import team.weyoung.service.ICompetitionService;
 import team.weyoung.service.IContestantInfoService;
 import team.weyoung.listener.UploadDTOListener;
+import team.weyoung.service.IMatchInfoService;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 比赛表 控制层。
@@ -26,6 +37,7 @@ import java.io.IOException;
  * @author TuNan
  * @since 2023-12-25
  */
+@Slf4j
 @RestController
 @RequestMapping("/competition")
 public class CompetitionController {
@@ -35,6 +47,9 @@ public class CompetitionController {
 
     @Resource
     private IContestantInfoService iContestantInfoService;
+
+    @Resource
+    private IMatchInfoService iMatchInfoService;
 
     @PostMapping("/add")
     public Result<Long> addCompetition(@RequestBody Competition competition) {
@@ -55,6 +70,45 @@ public class CompetitionController {
         return Result.success(b);
     }
 
+    @PostMapping("/update")
+    public Result<Boolean> updateCompetition(@RequestBody CompetitionUpdateDTO competitionUpdateDTO) {
+        if (competitionUpdateDTO == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Competition competition = iCompetitionService.getOne(new QueryWrapper()
+                .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
+        // 如果isMatch字段改变则执行对战操作
+        if (competitionUpdateDTO.getIsMatchOpen() != null && competitionUpdateDTO.getIsMatchOpen() != competition.getIsMatchOpen()) {
+            // 查询当前比赛的人数
+            List<ContestantInfo> contestantInfos = iContestantInfoService.list(new QueryWrapper()
+                    .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
+            // 如果人数为奇数则不允许开启对战
+            if (contestantInfos.size() % 2 != 0) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前比赛人数为奇数，不允许开启对战");
+            }
+            // 如果人数为偶数则执行对战操作 随机将两人分为一组插入对战表
+            Collections.shuffle(contestantInfos);
+            List<MatchInfo> matchInfos = new ArrayList<>();
+            for (int i = 0; i < contestantInfos.size() - 1; i += 2) {
+                ContestantInfo contestant1 = contestantInfos.get(i);
+                ContestantInfo contestant2 = contestantInfos.get(i + 1);
+                // 插入 matchInfo
+                MatchInfo matchInfo = MatchInfo.builder()
+                        .competitionId(competitionUpdateDTO.getCompetitionId())
+                        .contestant1Id(contestant1.getContestantId())
+                        .contestant2Id(contestant2.getContestantId())
+                        .build();
+                matchInfos.add(matchInfo);
+            }
+            boolean b = iMatchInfoService.saveBatch(matchInfos);
+            ThrowUtils.throwIf(!b, ErrorCode.OPERATION_ERROR);
+        }
+        BeanUtils.copyProperties(competitionUpdateDTO, competition);
+        boolean result = iCompetitionService.updateById(competition);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return Result.success(true);
+    }
+
     @PostMapping("/list/page")
     public Result<Page<Competition>> page(@RequestBody CompetitionQueryRequest competitionQueryRequest, HttpServletRequest request) {
         long pageNumber = competitionQueryRequest.getPageNumber();
@@ -64,11 +118,15 @@ public class CompetitionController {
     }
 
     @PostMapping("/upload")
-    public Result<Boolean> upload(MultipartFile file,Long competitionId) throws IOException {
+    public Result<Boolean> upload(MultipartFile file, Long competitionId) throws IOException {
         if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        EasyExcel.read(file.getInputStream(), ContestantUploadDTO.class, new UploadDTOListener(iContestantInfoService,competitionId)).sheet().doRead();
+        if (competitionId == null || competitionId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        EasyExcel.read(file.getInputStream(), ContestantUploadDTO.class,
+                new UploadDTOListener(iContestantInfoService, competitionId)).sheet().doRead();
         // 把文件存入到临时文件
         return Result.success(true);
     }
