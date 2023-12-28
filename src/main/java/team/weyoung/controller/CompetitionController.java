@@ -12,6 +12,7 @@ import team.weyoung.common.ErrorCode;
 import team.weyoung.common.Result;
 import team.weyoung.exception.BusinessException;
 import team.weyoung.exception.ThrowUtils;
+import team.weyoung.model.dto.competition.CompetitionDTO;
 import team.weyoung.model.dto.competition.CompetitionQueryRequest;
 import team.weyoung.model.dto.competition.CompetitionUpdateDTO;
 import team.weyoung.model.dto.contestantInfo.ContestantUploadDTO;
@@ -127,6 +128,21 @@ public class CompetitionController {
         long pageSize = competitionQueryRequest.getPageSize();
         Page<Competition> competitionPage = iCompetitionService.page(new Page<>(pageNumber, pageSize));
         return Result.success(competitionPage);
+    }
+
+    @PostMapping("/list")
+    public Result<List<CompetitionDTO>> list() {
+        List<Competition> competitions = iCompetitionService.list(new QueryWrapper()
+                .eq("is_delete", 0)
+                .eq("is_voting_open", 1)
+                .eq("is_match_open", 1));
+        List<CompetitionDTO> competitionDTOS = new ArrayList<>();
+        for (Competition competition : competitions) {
+            CompetitionDTO competitionDTO = new CompetitionDTO();
+            BeanUtils.copyProperties(competition, competitionDTO);
+            competitionDTOS.add(competitionDTO);
+        }
+        return Result.success(competitionDTOS);
     }
 
     @PostMapping("/upload")

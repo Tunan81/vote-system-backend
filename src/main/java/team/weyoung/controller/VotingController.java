@@ -1,16 +1,11 @@
 package team.weyoung.controller;
 
-import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import team.weyoung.common.ErrorCode;
 import team.weyoung.common.Result;
 import team.weyoung.exception.BusinessException;
@@ -20,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 投票表 控制层。
@@ -37,8 +30,12 @@ public class VotingController {
     @Resource
     private IVotingService iVotingService;
 
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
     @PostMapping("/add")
-    public Result<Long> addVote(@RequestBody Voting voting, HttpServletRequest request) {
+    public Result<Long> addVote(@RequestBody Voting voting, HttpServletRequest request,
+                                String exchange, String routingKey) {
         if (voting == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -49,6 +46,7 @@ public class VotingController {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "已经投过票了");
         }
         long result = iVotingService.addVote(voting, request);
+        //long result = rabbitTemplate.convertAndSend(exchange, routingKey, voting);
         return Result.success(result);
     }
 
