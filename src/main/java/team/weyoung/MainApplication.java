@@ -14,8 +14,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 
 @EnableScheduling
-@SpringBootApplication
+//@SpringBootApplication
 @MapperScan("team.weyoung.mapper")
+@SpringBootApplication(exclude = {RedisAutoConfiguration.class})
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 public class MainApplication {
 

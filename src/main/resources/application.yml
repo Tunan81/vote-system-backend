@@ -13,7 +13,7 @@ spring:
       matching-strategy: ant_path_matcher
   # session 配置
   session:
-    store-type: redis
+    #store-type: redis
     # 30 天过期
     timeout: 2592000
   # 数据库配置
@@ -33,12 +33,12 @@ spring:
       connection-timeout: 30000
       connection-test-query: SELECT 1
 
-  # Redis 配置
-  redis:
-    database: 2
-    host: localhost
-    port: 6379
-    timeout: 5000
+    # Redis 配置
+    #  redis:
+    #    database: 2
+    #    host: localhost
+    #    port: 6379
+    #    timeout: 5000
     #password: 261615
   # 文件上传
   servlet:

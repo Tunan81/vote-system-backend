@@ -78,7 +78,7 @@ public class CompetitionController {
         Competition competition = iCompetitionService.getOne(new QueryWrapper()
                 .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
         // 如果isMatch字段改变则执行对战操作
-        if (competitionUpdateDTO.getIsMatchOpen() != null && competitionUpdateDTO.getIsMatchOpen() != competition.getIsMatchOpen()) {
+        if (competitionUpdateDTO.getIsMatchOpen() != null && competitionUpdateDTO.getIsMatchOpen()) {
             // 查询当前比赛的人数
             List<ContestantInfo> contestantInfos = iContestantInfoService.list(new QueryWrapper()
                     .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
@@ -102,6 +102,18 @@ public class CompetitionController {
             }
             boolean b = iMatchInfoService.saveBatch(matchInfos);
             ThrowUtils.throwIf(!b, ErrorCode.OPERATION_ERROR);
+        } else {
+            // 删除对战表信息
+            List<MatchInfo> matchInfos = iMatchInfoService.list(new QueryWrapper()
+                    .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
+            if (matchInfos != null && matchInfos.size() > 0) {
+                Collection<Long> matchIds = new ArrayList<>();
+                for (MatchInfo matchInfo : matchInfos) {
+                    matchIds.add(matchInfo.getMatchId());
+                }
+                boolean b = iMatchInfoService.removeByIds(matchIds);
+                ThrowUtils.throwIf(!b, ErrorCode.OPERATION_ERROR);
+            }
         }
         BeanUtils.copyProperties(competitionUpdateDTO, competition);
         boolean result = iCompetitionService.updateById(competition);
