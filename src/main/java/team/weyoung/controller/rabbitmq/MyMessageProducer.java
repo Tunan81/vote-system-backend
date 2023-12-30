@@ -1,7 +1,8 @@
-package team.weyoung.controller;
+package team.weyoung.controller.rabbitmq;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+import team.weyoung.model.dto.VotingMessage;
 import team.weyoung.model.entity.Voting;
 
 import javax.annotation.Resource;

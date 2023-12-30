@@ -35,7 +35,7 @@ public class VotingServiceImpl extends ServiceImpl<VotingMapper, Voting> impleme
     private UserService userService;
 
     @Override
-    public long addVote(Voting voting, HttpServletRequest request) {
+    public long addVote(Voting voting) {
         ContestantInfo contestantInfo = iContestantInfoService.getById(voting.getContestantId());
         // 1.判断是否是评委投票
         if (voting.getUserId() == null) {

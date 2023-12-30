@@ -12,14 +12,14 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d # 指定初始化脚本
     restart: always # 指定重启策略
     networks:
-      - hicode-network # 指定网络
+      - vote-network # 指定网络
   redis:
     image: redis:6 # 指定镜像
     container_name: hicode-redis # 指定容器名
     ports:
       - "6379:6379" # 指定端口映射
     networks:
-      - hicode-network # 指定网络
+      - vote-network # 指定网络
     volumes:
       - ./.redis-data:/data # 指定数据卷
   vote-system-backend:
@@ -30,9 +30,9 @@ services:
     ports:
         - "8101:8101"
     networks:
-        - hicode-network
+        - vote-network
     depends_on:
         - mysql
         - redis
 networks:
-  hicode-network:
+  vote-network:

@@ -13,5 +13,5 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface IVotingService extends IService<Voting> {
 
-    long addVote(Voting voting, HttpServletRequest request);
+    long addVote(Voting voting);
 }

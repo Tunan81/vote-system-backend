@@ -2,13 +2,15 @@ package team.weyoung.controller;
 
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import team.weyoung.common.ErrorCode;
 import team.weyoung.common.Result;
+import team.weyoung.constant.RabbitMQConstant;
+import team.weyoung.controller.rabbitmq.MyMessageProducer;
 import team.weyoung.exception.BusinessException;
+import team.weyoung.model.dto.VotingMessage;
 import team.weyoung.model.entity.Voting;
 import team.weyoung.service.IVotingService;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,11 +33,10 @@ public class VotingController {
     private IVotingService iVotingService;
 
     @Resource
-    private RabbitTemplate rabbitTemplate;
+    private MyMessageProducer myMessageProducer;
 
     @PostMapping("/add")
-    public Result<Long> addVote(@RequestBody Voting voting, HttpServletRequest request,
-                                String exchange, String routingKey) {
+    public Result<Boolean> addVote(@RequestBody Voting voting, HttpServletRequest request) {
         if (voting == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -45,9 +46,9 @@ public class VotingController {
         if (voting1 != null) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "已经投过票了");
         }
-        long result = iVotingService.addVote(voting, request);
-        //long result = rabbitTemplate.convertAndSend(exchange, routingKey, voting);
-        return Result.success(result);
+        //long result = iVotingService.addVote(voting, request);
+        myMessageProducer.sendMessage(RabbitMQConstant.EXCHANGE_VOTE_DIRECT, RabbitMQConstant.ROUTING_VOTE, voting);
+        return Result.success(true);
     }
 
 }

@@ -37,6 +37,7 @@ public class InitRabbitMqBean {
             factory.setHost(host);
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
+            channel.basicQos(200);
             channel.exchangeDeclare(RabbitMQConstant.EXCHANGE_VOTE_DIRECT, "direct");
             channel.queueDeclare(RabbitMQConstant.QUEUE_VOTE, true, false, false, null);
             channel.queueBind(RabbitMQConstant.QUEUE_VOTE, RabbitMQConstant.EXCHANGE_VOTE_DIRECT, RabbitMQConstant.ROUTING_VOTE);

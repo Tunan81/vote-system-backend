@@ -27,10 +27,13 @@ import team.weyoung.service.IMatchInfoService;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static team.weyoung.model.entity.table.CompetitionTableDef.COMPETITION;
 
 /**
  * 比赛表 控制层。
@@ -52,6 +55,7 @@ public class CompetitionController {
     @Resource
     private IMatchInfoService iMatchInfoService;
 
+    //todo 前端如果要传时间会报错
     @PostMapping("/add")
     public Result<Long> addCompetition(@RequestBody Competition competition) {
         if (competition == null) {
@@ -77,12 +81,12 @@ public class CompetitionController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Competition competition = iCompetitionService.getOne(new QueryWrapper()
-                .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
+                .eq(COMPETITION.COMPETITION_ID.getName(), competitionUpdateDTO.getCompetitionId()));
         // 如果isMatch字段改变则执行对战操作
         if (competitionUpdateDTO.getIsMatchOpen() != null && competitionUpdateDTO.getIsMatchOpen()) {
             // 查询当前比赛的人数
             List<ContestantInfo> contestantInfos = iContestantInfoService.list(new QueryWrapper()
-                    .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
+                    .eq(COMPETITION.COMPETITION_ID.getName(), competitionUpdateDTO.getCompetitionId()));
             // 如果人数为奇数则不允许开启对战
             if (contestantInfos.size() % 2 != 0) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前比赛人数为奇数，不允许开启对战");
@@ -106,7 +110,7 @@ public class CompetitionController {
         } else {
             // 删除对战表信息
             List<MatchInfo> matchInfos = iMatchInfoService.list(new QueryWrapper()
-                    .eq("competition_id", competitionUpdateDTO.getCompetitionId()));
+                    .eq(COMPETITION.COMPETITION_ID.getName(), competitionUpdateDTO.getCompetitionId()));
             if (matchInfos != null && matchInfos.size() > 0) {
                 Collection<Long> matchIds = new ArrayList<>();
                 for (MatchInfo matchInfo : matchInfos) {
@@ -155,7 +159,6 @@ public class CompetitionController {
         }
         EasyExcel.read(file.getInputStream(), ContestantUploadDTO.class,
                 new UploadDTOListener(iContestantInfoService, competitionId)).sheet().doRead();
-        // 把文件存入到临时文件
         return Result.success(true);
     }
 }
