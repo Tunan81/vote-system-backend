@@ -63,6 +63,11 @@ public class MatchInfo implements Serializable {
     private Timestamp updateTime;
 
     /**
+     * 是否开启比赛对战
+     */
+    private Boolean isMatchOpen;
+
+    /**
      * 是否删除
      */
     private Integer isDelete;

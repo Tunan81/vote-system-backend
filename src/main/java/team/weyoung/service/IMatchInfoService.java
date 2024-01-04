@@ -15,4 +15,6 @@ import team.weyoung.model.entity.MatchInfo;
 public interface IMatchInfoService extends IService<MatchInfo> {
 
     Page<MatchInfoVO> listMatchInfo(MatchInfoQueryRequest matchInfoQueryRequest);
+
+    boolean updateMatchInfo(MatchInfo matchInfo);
 }

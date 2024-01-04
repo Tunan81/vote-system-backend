@@ -87,6 +87,9 @@ public class CompetitionController {
             // 查询当前比赛的人数
             List<ContestantInfo> contestantInfos = iContestantInfoService.list(new QueryWrapper()
                     .eq(COMPETITION.COMPETITION_ID.getName(), competitionUpdateDTO.getCompetitionId()));
+            if (contestantInfos.isEmpty()) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "请先导入选手信息");
+            }
             // 如果人数为奇数则不允许开启对战
             if (contestantInfos.size() % 2 != 0) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前比赛人数为奇数，不允许开启对战");
