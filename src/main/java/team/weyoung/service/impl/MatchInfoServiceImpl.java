@@ -78,7 +78,9 @@ public class MatchInfoServiceImpl extends ServiceImpl<MatchInfoMapper, MatchInfo
     public boolean updateMatchInfo(MatchInfo matchInfo) {
         Boolean isMatchOpen = matchInfo.getIsMatchOpen();
         // 先查询表中是否有isMatchOpen为1的数据
-        MatchInfo matchInfo1 = this.getOne(new QueryWrapper().eq("is_match_open", 1));
+        MatchInfo matchInfo1 = this.getOne(new QueryWrapper()
+                .eq("is_match_open", 1)
+                .eq("competition_id", matchInfo.getCompetitionId()));
         MatchInfo matchInfo2 = new MatchInfo();
         if (isMatchOpen) {
             if (matchInfo1 != null) {
