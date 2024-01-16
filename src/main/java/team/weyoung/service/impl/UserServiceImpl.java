@@ -1,5 +1,6 @@
 package team.weyoung.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.github.xiaoymin.knife4j.core.util.CollectionUtils;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -110,35 +111,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 3. 记录用户的登录态
-        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        StpUtil.login(user.getId());
+        //request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
     }
 
 
     /**
      * 获取当前登录用户
-     *
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return currentUser;
+        Long userLoginId = Long.valueOf((String) StpUtil.getLoginId());
+//        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+//        User currentUser = (User) userObj;
+//        if (currentUser == null || currentUser.getId() == null) {
+//            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+//        }
+//        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+//        long userId = currentUser.getId();
+//        currentUser = this.getById(userId);
+//        if (currentUser == null) {
+//            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+//        }
+        return this.getById(userLoginId);
     }
 
     /**
      * 获取当前登录用户（允许未登录）
-     *
      */
     @Override
     public User getLoginUserPermitNull(HttpServletRequest request) {
@@ -155,7 +155,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     /**
      * 是否为管理员
-     *
      */
     @Override
     public boolean isAdmin(HttpServletRequest request) {
@@ -175,11 +174,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public boolean userLogout(HttpServletRequest request) {
-        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
-        }
-        // 移除登录态
-        request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
+        System.out.println(StpUtil.getLoginId());
+        StpUtil.logout();
+//        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
+//            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+//        }
+//        // 移除登录态
+//        request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
         return true;
     }
 

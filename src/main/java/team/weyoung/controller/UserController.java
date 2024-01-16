@@ -1,5 +1,6 @@
 package team.weyoung.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -100,7 +101,7 @@ public class UserController {
      */
     @PostMapping("/add")
     //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public Result<Long> addUser(@RequestBody UserAddRequest userAddRequest, HttpServletRequest request) {
+    public Result<Long> addUser(@RequestBody UserAddRequest userAddRequest) {
         if (userAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -119,7 +120,7 @@ public class UserController {
      */
     @PostMapping("/delete")
     //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public Result<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public Result<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -132,8 +133,7 @@ public class UserController {
      */
     @PostMapping("/update")
     //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public Result<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
-                                            HttpServletRequest request) {
+    public Result<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -149,7 +149,7 @@ public class UserController {
      */
     @GetMapping("/get")
     //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public Result<User> getUserById(long id, HttpServletRequest request) {
+    public Result<User> getUserById(long id) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -162,8 +162,8 @@ public class UserController {
      * 根据 id 获取包装类
      */
     @GetMapping("/get/vo")
-    public Result<UserVO> getUserVOById(long id, HttpServletRequest request) {
-        Result<User> response = getUserById(id, request);
+    public Result<UserVO> getUserVOById(long id) {
+        Result<User> response = getUserById(id);
         User user = response.getData();
         return Result.success(userService.getUserVO(user));
     }
@@ -172,9 +172,9 @@ public class UserController {
      * 分页获取用户列表（仅管理员）
      */
     @PostMapping("/list/page")
+    @SaCheckLogin
     //@AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public Result<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest,
-                                                   HttpServletRequest request) {
+    public Result<Page<User>> listUserByPage(@RequestBody UserQueryRequest userQueryRequest) {
         long pageNumber = userQueryRequest.getPageNumber();
         long pageSize = userQueryRequest.getPageSize();
         Page<User> userPage = userService.page(new Page<>(pageNumber, pageSize));
